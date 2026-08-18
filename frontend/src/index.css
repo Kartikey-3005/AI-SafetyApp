@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-radius: 0px !important;
+  }
+  
+  body {
+    background-color: #1A0E23;
+    background-image: radial-gradient(circle at 50% 0%, #381E48 0%, #1A0E23 70%);
+    color: #F8F4E9;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom Violet Dusk HUD Glows & Cards */
+.hud-card {
+  background-color: #2A1638;
+  border: 1px solid #4A2A5E;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.hud-card:hover {
+  border-color: #F6DBC0;
+  box-shadow: 0 0 15px rgba(246, 219, 192, 0.25), 0 0 30px rgba(147, 80, 115, 0.3);
+}
+
+.hud-button-primary {
+  background: linear-gradient(135deg, #935073 0%, #723B69 50%, #502D55 100%);
+  color: #F8F4E9;
+  font-weight: 700;
+  border: 1px solid #F6DBC0;
+  box-shadow: 0 0 15px rgba(147, 80, 115, 0.5);
+  transition: all 0.2s ease-in-out;
+}
+
+.hud-button-primary:hover {
+  background: linear-gradient(135deg, #F6DBC0 0%, #935073 100%);
+  color: #1A0E23;
+  box-shadow: 0 0 20px rgba(246, 219, 192, 0.7);
+}
+
+.hud-button-secondary {
+  background-color: #2A1638;
+  color: #F8F4E9;
+  border: 1px solid #4A2A5E;
+  transition: all 0.2s ease-in-out;
+}
+
+.hud-button-secondary:hover {
+  border-color: #F6DBC0;
+  color: #F6DBC0;
+  background-color: #381E48;
+}
+
+/* Violet Dusk text glow */
+.text-electric-glow {
+  color: #F6DBC0;
+  text-shadow: 0 0 10px rgba(246, 219, 192, 0.6);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1A0E23;
+}
+::-webkit-scrollbar-thumb {
+  background: #4A2A5E;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #935073;
+}
