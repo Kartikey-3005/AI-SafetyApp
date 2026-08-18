@@ -1,0 +1,109 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  PARENT
+  CHILD
+}
+
+enum LogStatus {
+  ALLOWED
+  BLOCKED
+  WARNED
+}
+
+enum StrictnessLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ThreatType {
+  MALWARE
+  PHISHING
+  TOXICITY
+  HARASSMENT
+  HATE_SPEECH
+  SELF_HARM
+  PII_LEAK
+  UNVERIFIED_ADULT
+  NONE
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String?       @unique
+  name         String
+  role         Role          @default(PARENT)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Parent -> Children Relations
+  parentId     String?
+  parent       User?         @relation("FamilyHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children     User[]        @relation("FamilyHierarchy")
+
+  // Child-specific relations
+  activityLogs ActivityLog[]
+  settings     Settings?
+  gamification Gamification?
+
+  @@index([parentId])
+}
+
+model ActivityLog {
+  id                       String     @id @default(uuid())
+  userId                   String
+  user                     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  content                  String     @db.Text
+  contentType              String     // e.g. "URL", "DIRECT_MESSAGE", "SEARCH_QUERY"
+  appSource                String     // e.g. "Discord", "Roblox", "YouTube", "Chrome"
+  status                   LogStatus  @default(ALLOWED)
+  threatType               ThreatType @default(NONE)
+  severityScore            Float      @default(0.0) // 0.0 to 1.0
+  
+  parentDiagnosticReason   String?    @db.Text
+  childFriendlyExplanation String?    @db.Text
+  
+  createdAt                DateTime   @default(now())
+
+  @@index([userId, createdAt])
+  @@index([status])
+}
+
+model Settings {
+  id                   String          @id @default(uuid())
+  userId               String          @unique
+  user                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  strictness           StrictnessLevel @default(MEDIUM)
+  safeBrowsingEnabled  Boolean         @default(true)
+  aiModerationEnabled  Boolean         @default(true)
+  onDevicePrivacyOnly  Boolean         @default(false)
+  autoBlockNewContacts Boolean         @default(true)
+  instantParentAlerts  Boolean         @default(true)
+  
+  updatedAt            DateTime        @updatedAt
+}
+
+model Gamification {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  petName          String   @default("VIPER-007")
+  petLevel         Int      @default(1)
+  currentXp        Int      @default(0)
+  xpToNextLevel    Int      @default(500)
+  safetyScore      Int      @default(100) // 0 - 100
+  safetyStreakDays Int      @default(0)
+  
+  updatedAt        DateTime @updatedAt
+}
