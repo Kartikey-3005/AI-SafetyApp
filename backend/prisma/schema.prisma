@@ -36,6 +36,15 @@ enum ThreatType {
   NONE
 }
 
+enum BlocklistCategory {
+  BETTING_GAMBLING
+  PREDATORY_CONTENT
+  MALICIOUS_PHISHING
+  GOVERNMENT_DIRECTIVE
+  CYBER_FRAUD
+  GENERAL_SAFETY
+}
+
 model User {
   id           String        @id @default(uuid())
   email        String?       @unique
@@ -64,10 +73,16 @@ model ActivityLog {
   
   content                  String     @db.Text
   contentType              String     // e.g. "URL", "DIRECT_MESSAGE", "SEARCH_QUERY"
-  appSource                String     // e.g. "Discord", "Roblox", "YouTube", "Chrome"
+  appSource                String     @default("Browser") // e.g. "Discord", "Roblox", "YouTube", "Chrome"
   status                   LogStatus  @default(ALLOWED)
   threatType               ThreatType @default(NONE)
   severityScore            Float      @default(0.0) // 0.0 to 1.0
+  
+  scannedUrl               String?    @db.Text
+  normalizedHost           String?
+  blockedReason            String?    @db.Text
+  flaggedLayer             String?
+  fromCache                Boolean    @default(false)
   
   parentDiagnosticReason   String?    @db.Text
   childFriendlyExplanation String?    @db.Text
@@ -76,6 +91,20 @@ model ActivityLog {
 
   @@index([userId, createdAt])
   @@index([status])
+  @@index([normalizedHost])
+}
+
+model IndiaBlocklist {
+  id              String            @id @default(uuid())
+  domain          String            @unique // e.g., "banned-betting-site.in", "illegal-domain.xyz"
+  category        BlocklistCategory @default(GOVERNMENT_DIRECTIVE)
+  reason          String            @default("Regionally Banned Content")
+  sourceGovtOrder String?           // Optional reference to MeitY/DoT notification
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([domain, isActive])
 }
 
 model Settings {
