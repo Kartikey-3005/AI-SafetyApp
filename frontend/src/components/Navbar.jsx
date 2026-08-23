@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, LayoutDashboard, FileText, Settings, ScanLine, UserCheck, LogIn, LogOut } from 'lucide-react';
+import { Shield, LayoutDashboard, FileText, Settings, ScanLine, LogIn, LogOut, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
@@ -34,10 +34,12 @@ export default function Navbar() {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
+            const targetPath = user ? item.path : '/signin';
+
             return (
               <Link
                 key={item.path}
-                to={item.path}
+                to={targetPath}
                 className={`flex items-center gap-2 px-3.5 py-2 text-sm font-semibold tracking-wide border transition-all ${
                   isActive
                     ? 'bg-[#381E48] border-[#F6DBC0] text-[#F6DBC0]'
@@ -46,16 +48,17 @@ export default function Navbar() {
               >
                 <Icon className="w-4 h-4" />
                 {item.name}
+                {!user && <Lock className="w-3 h-3 text-[#C4B0C7]/60 ml-0.5" />}
               </Link>
             );
           })}
         </nav>
 
-        {/* Status Badge & Auth State */}
+        {/* Status Badge & Google Auth State */}
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-[#1A0E23] border border-[#935073] text-[#F6DBC0] text-xs font-mono">
             <span className="w-2 h-2 rounded-none bg-[#935073]"></span>
-            SHIELD ACTIVE
+            {user ? 'SHIELD ACTIVE' : 'LOCKED • AUTH REQUIRED'}
           </div>
 
           {user ? (
@@ -72,7 +75,7 @@ export default function Navbar() {
               <button
                 onClick={logout}
                 title="Sign Out"
-                className="p-1.5 bg-[#1A0E23] border border-[#4A2A5E] text-[#C4B0C7] hover:text-[#F6DBC0] hover:border-[#935073] transition-all"
+                className="p-1.5 bg-[#1A0E23] border border-[#4A2A5E] text-[#C4B0C7] hover:text-[#F6DBC0] hover:border-[#935073] transition-all cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
               </button>
@@ -80,14 +83,14 @@ export default function Navbar() {
           ) : (
             <Link
               to="/signin"
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold tracking-wider border transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-mono font-bold tracking-wider border transition-all ${
                 location.pathname === '/signin'
                   ? 'bg-[#F6DBC0] text-[#1A0E23] border-[#F6DBC0]'
                   : 'hud-button-primary'
               }`}
             >
               <LogIn className="w-3.5 h-3.5" />
-              SIGN IN
+              GOOGLE SIGN IN
             </Link>
           )}
         </div>
