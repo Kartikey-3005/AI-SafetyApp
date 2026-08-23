@@ -29,6 +29,17 @@ export async function getDashboardLogs(req, res) {
   }
 }
 
+export async function getDashboardSettings(req, res) {
+  try {
+    const { childId = 'child-1' } = req.query;
+    const settings = await DashboardService.getSettings(childId);
+    return res.status(200).json({ settings });
+  } catch (error) {
+    console.error('Dashboard Settings Error:', error);
+    return res.status(500).json({ error: 'Failed to retrieve settings.' });
+  }
+}
+
 export async function updateDashboardSettings(req, res) {
   try {
     const { childId = 'child-1', settings } = req.body;
