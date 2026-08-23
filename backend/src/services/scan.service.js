@@ -4,6 +4,12 @@ import { redisClient } from '../config/redis.js';
 import { checkGoogleSafeBrowsing } from '../integrations/googleSafeBrowsing.js';
 import { checkOpenAiModeration } from '../integrations/openAiModeration.js';
 import { generateChildFriendlyExplanation } from '../integrations/openAiExplainer.js';
+import {
+  parseAndNormalizeUrl,
+  checkIndiaRegionalBlocklist,
+  checkHeuristicsThreats,
+  adultKeywords,
+} from './urlScanner.service.js';
 
 const CACHE_TTL_SECONDS = 3600;
 
@@ -37,9 +43,53 @@ export class ScanService {
     let severityScore = 0.0;
     let parentReason = null;
 
-    // 2. Check Google Safe Browsing
-    const isUrl = contentType === 'URL' || content.startsWith('http://') || content.startsWith('https://');
-    if (isUrl && isSafeBrowsingActive) {
+    const lowerContent = content.toLowerCase();
+
+    // 2. Direct Keyword Interception (Adult / Explicit terms)
+    const isAdultKeyword = adultKeywords.some((keyword) => lowerContent.includes(keyword));
+    if (isAdultKeyword) {
+      isBlocked = true;
+      threatType = 'TOXICITY';
+      severityScore = 0.99;
+      parentReason = 'Explicit / Adult Content Detected: Prohibited for child safety.';
+    }
+
+    // 3. Check URL Heuristics & Regional Blocklists
+    const isUrl =
+      contentType === 'URL' ||
+      content.startsWith('http://') ||
+      content.startsWith('https://') ||
+      content.includes('.com') ||
+      content.includes('.org') ||
+      content.includes('.net') ||
+      content.includes('.xyz') ||
+      content.includes('.app');
+
+    if (!isBlocked && isUrl) {
+      try {
+        const parsed = parseAndNormalizeUrl(content);
+        const regionalCheck = await checkIndiaRegionalBlocklist(parsed.hostname);
+        if (regionalCheck.isThreat) {
+          isBlocked = true;
+          threatType = 'PHISHING';
+          severityScore = 1.0;
+          parentReason = regionalCheck.reason;
+        } else {
+          const heuristicsCheck = checkHeuristicsThreats(parsed);
+          if (heuristicsCheck.isThreat) {
+            isBlocked = true;
+            threatType = heuristicsCheck.reason.includes('Adult') ? 'TOXICITY' : 'PHISHING';
+            severityScore = 0.95;
+            parentReason = heuristicsCheck.reason;
+          }
+        }
+      } catch (e) {
+        // Not a standard URL, continue with moderation
+      }
+    }
+
+    // 4. Check Google Safe Browsing
+    if (!isBlocked && isUrl && isSafeBrowsingActive) {
       const gsbResult = await checkGoogleSafeBrowsing(content);
       if (gsbResult.isMalicious) {
         isBlocked = true;
@@ -49,7 +99,7 @@ export class ScanService {
       }
     }
 
-    // 3. Check OpenAI Content Moderation
+    // 5. Check OpenAI Content Moderation
     if (!isBlocked && isAiModActive) {
       const modResult = await checkOpenAiModeration(content);
       if (modResult.flagged) {
