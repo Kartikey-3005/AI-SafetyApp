@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScanLine, ShieldAlert, ShieldCheck, Play, Sparkles } from 'lucide-react';
+import { ScanLine, ShieldAlert, ShieldCheck, Play } from 'lucide-react';
 
 export default function DemoScannerPage() {
   const [content, setContent] = useState('');
@@ -49,7 +49,6 @@ export default function DemoScannerPage() {
         const data = await res.json();
         setResult(data);
       } else {
-        // Fallback local calculation
         const isSuspicious =
           textToScan.toLowerCase().includes('v-bucks') ||
           textToScan.toLowerCase().includes('robux') ||
@@ -98,7 +97,7 @@ export default function DemoScannerPage() {
                 setAppSource(p.app);
                 handleScan(p.text, p.app);
               }}
-              className="px-3 py-1.5 bg-[#2A1638] border border-[#4A2A5E] hover:border-[#F6DBC0] text-xs font-mono text-[#F8F4E9] transition-all flex items-center gap-1.5 shadow-[0_0_8px_rgba(0,0,0,0.3)]"
+              className="px-3 py-1.5 bg-[#2A1638] border border-[#4A2A5E] hover:border-[#F6DBC0] text-xs font-mono text-[#F8F4E9] transition-all flex items-center gap-1.5"
             >
               <Play className="w-3 h-3 text-[#F6DBC0]" />
               {p.title}
