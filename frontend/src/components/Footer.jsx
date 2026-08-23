@@ -10,7 +10,7 @@ export default function Footer() {
           {/* Brand Col */}
           <div className="md:col-span-1 space-y-3">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-8 h-8 bg-[#1A0E23] border border-[#F6DBC0] flex items-center justify-center shadow-[0_0_10px_rgba(246,219,192,0.3)] group-hover:shadow-[0_0_15px_rgba(246,219,192,0.6)] transition-all">
+              <div className="w-8 h-8 bg-[#1A0E23] border border-[#F6DBC0] flex items-center justify-center transition-all">
                 <Shield className="w-4 h-4 text-[#F6DBC0]" />
               </div>
               <div>
