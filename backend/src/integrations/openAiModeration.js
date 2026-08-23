@@ -22,6 +22,28 @@ export async function checkOpenAiModeration(text) {
       lower.includes('send your phone number') ||
       lower.includes('whatsapp number');
 
+    const isAdult =
+      lower.includes('porn') ||
+      lower.includes('pornhub') ||
+      lower.includes('xxx') ||
+      lower.includes('xvideos') ||
+      lower.includes('onlyfans') ||
+      lower.includes('sex') ||
+      lower.includes('nude') ||
+      lower.includes('naked') ||
+      lower.includes('chaturbate') ||
+      lower.includes('desiflix') ||
+      lower.includes('ullu');
+
+    if (isAdult) {
+      return {
+        flagged: true,
+        threatType: 'TOXICITY',
+        score: 0.99,
+        reason: 'Explicit / Adult Content Detected: Prohibited for child safety.',
+      };
+    }
+
     if (isBullying) {
       return {
         flagged: true,
