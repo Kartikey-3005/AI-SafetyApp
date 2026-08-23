@@ -1,90 +1,71 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Shield, Lock, Mail, User, Eye, EyeOff, ArrowRight, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Shield, Lock, CheckCircle, AlertCircle, ArrowRight, Sparkles, UserCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function SignInPage() {
   const navigate = useNavigate();
-  const { loginWithEmail, registerWithEmail, loginWithGoogle, user, logout } = useAuth();
+  const location = useLocation();
+  const { loginWithGoogle, user, logout } = useAuth();
 
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('PARENT');
-  const [showPassword, setShowPassword] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [customEmail, setCustomEmail] = useState('');
+  const [customName, setCustomName] = useState('');
+  const [role, setRole] = useState('PARENT');
 
-  // Pre-configured Quick Demo Accounts
-  const demoAccounts = [
+  // Destination path (redirect back to wherever user was trying to go)
+  const fromPath = location.state?.from?.pathname || '/dashboard';
+
+  // Quick Google Identity Profiles
+  const googleDemoProfiles = [
     {
-      title: 'Parent / Guardian Demo',
-      email: 'guardian@safekids.ai',
-      password: 'SafeKids2026!',
+      title: 'Sign in as Guardian (Sarah Connor)',
+      email: 'sarah.connor@gmail.com',
+      name: 'Sarah Connor',
       role: 'PARENT',
-      badge: 'Admin Guardian',
+      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=SarahGoogle',
+      badge: 'Parent Guardian',
     },
     {
-      title: 'Youth Learner Demo',
-      email: 'child@safekids.ai',
-      password: 'SafeKids2026!',
+      title: 'Sign in as Youth Learner (Leo Connor)',
+      email: 'leo.connor.kids@gmail.com',
+      name: 'Leo Connor',
       role: 'CHILD',
+      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=LeoGoogle',
       badge: 'Protected Child',
+    },
+    {
+      title: 'Sign in as Educator / School Admin',
+      email: 'educator.safety@gmail.com',
+      name: 'Prof. Miller',
+      role: 'PARENT',
+      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=MillerEdu',
+      badge: 'Educator License',
     },
   ];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleGoogleSignIn = async (profileOverride = null) => {
     setErrorMsg('');
     setSuccessMsg('');
     setLoading(true);
 
     try {
-      let result;
-      if (isSignUp) {
-        result = await registerWithEmail(name, email, password, role);
-      } else {
-        result = await loginWithEmail(email, password);
-      }
-
-      if (result.success) {
-        setSuccessMsg(isSignUp ? 'Account successfully registered!' : 'Welcome back!');
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 800);
-      } else {
-        setErrorMsg(result.error || 'Authentication failed.');
-      }
-    } catch (err) {
-      setErrorMsg(err.message || 'An unexpected error occurred.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setErrorMsg('');
-    setSuccessMsg('');
-    setLoading(true);
-
-    try {
-      // Realistic Google Identity Profile Simulation
-      const googleUserPayload = {
-        name: name || 'Google User',
-        email: email || 'user.google@safekids.ai',
-        googleId: `google_${Date.now()}`,
-        avatarUrl: 'https://lh3.googleusercontent.com/a/default-user=s96-c',
+      const payload = profileOverride || {
+        name: customName || (customEmail ? customEmail.split('@')[0] : 'Google User'),
+        email: customEmail || 'guardian.google@safekids.ai',
+        googleId: `google_oauth_${Date.now()}`,
+        avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(customName || customEmail || 'GoogleUser')}`,
         role: role || 'PARENT',
       };
 
-      const result = await loginWithGoogle(googleUserPayload);
+      const result = await loginWithGoogle(payload);
       if (result.success) {
-        setSuccessMsg('Google authentication verified!');
+        setSuccessMsg(`Google Authentication Verified for ${result.user.name}!`);
         setTimeout(() => {
-          navigate('/dashboard');
-        }, 800);
+          navigate(fromPath, { replace: true });
+        }, 700);
       } else {
         setErrorMsg(result.error || 'Google login failed.');
       }
@@ -93,25 +74,6 @@ export default function SignInPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleQuickDemoLogin = async (demo) => {
-    setEmail(demo.email);
-    setPassword(demo.password);
-    setErrorMsg('');
-    setSuccessMsg('');
-    setLoading(true);
-
-    const result = await loginWithEmail(demo.email, demo.password);
-    if (result.success) {
-      setSuccessMsg(`Logged in as ${demo.title}!`);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 700);
-    } else {
-      setErrorMsg(result.error || 'Demo login failed.');
-    }
-    setLoading(false);
   };
 
   if (user) {
@@ -123,27 +85,27 @@ export default function SignInPage() {
           </div>
 
           <div>
-            <h2 className="text-xl font-black tracking-wider text-[#F8F4E9]">ACTIVE SESSION DETECTED</h2>
+            <h2 className="text-xl font-black tracking-wider text-[#F8F4E9]">GOOGLE SESSION ACTIVE</h2>
             <p className="text-xs font-mono text-[#C4B0C7] mt-1">
-              Currently signed in as <strong className="text-[#F6DBC0]">{user.name}</strong> ({user.email})
+              Signed in via Google as <strong className="text-[#F6DBC0]">{user.name}</strong> ({user.email})
             </p>
             <span className="inline-block mt-2 px-2.5 py-0.5 bg-[#502D55] text-[#F6DBC0] border border-[#935073] text-[10px] font-mono font-bold uppercase">
-              Role: {user.role}
+              Authenticated Role: {user.role}
             </span>
           </div>
 
           <div className="flex flex-col gap-3 pt-2">
             <Link
               to="/dashboard"
-              className="hud-button-primary py-2.5 text-xs font-mono font-bold flex items-center justify-center gap-2"
+              className="hud-button-primary py-3 text-xs font-mono font-bold flex items-center justify-center gap-2"
             >
-              GO TO DASHBOARD <ArrowRight className="w-4 h-4" />
+              ENTER GUARDIAN DASHBOARD <ArrowRight className="w-4 h-4" />
             </Link>
             <button
               onClick={logout}
               className="hud-button-secondary py-2.5 text-xs font-mono font-bold"
             >
-              SIGN OUT CURRENT USER
+              SIGN OUT GOOGLE ACCOUNT
             </button>
           </div>
         </div>
@@ -152,57 +114,23 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto py-8">
-      {/* Header Badge */}
-      <div className="text-center mb-8 space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#2A1638] border border-[#4A2A5E] text-[#F6DBC0] text-xs font-mono font-bold tracking-widest uppercase">
-          <Shield className="w-3.5 h-3.5 text-[#F6DBC0]" /> Neural Guardian Access Portal
+    <div className="max-w-xl mx-auto py-8 space-y-6">
+      {/* Security Gatekeeper Header */}
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#2A1638] border border-[#935073] text-[#F6DBC0] text-xs font-mono font-bold tracking-widest uppercase">
+          <Lock className="w-3.5 h-3.5 text-[#F6DBC0]" /> Restricted Access • Google Login Required
         </div>
         <h1 className="text-3xl font-black tracking-tight text-[#F8F4E9] uppercase">
-          {isSignUp ? 'Create Guardian Account' : 'Sign In To SafeKids AI'}
+          SafeKids AI Access Portal
         </h1>
-        <p className="text-xs font-mono text-[#C4B0C7]">
-          Secure multi-layer gatekeeper telemetry & real-time child protection
+        <p className="text-xs font-mono text-[#C4B0C7] max-w-md mx-auto leading-relaxed">
+          To protect children and ensure COPPA compliance, all neural defenses and telemetry streams require an authenticated Google account.
         </p>
       </div>
 
-      {/* Main Form Card */}
+      {/* Main Authentication Card */}
       <div className="hud-card p-8 space-y-6">
-        {/* Toggle Mode: Sign In vs Sign Up */}
-        <div className="flex border border-[#4A2A5E] p-1 bg-[#1A0E23]">
-          <button
-            type="button"
-            onClick={() => {
-              setIsSignUp(false);
-              setErrorMsg('');
-              setSuccessMsg('');
-            }}
-            className={`flex-1 py-2 text-xs font-mono font-bold tracking-wider uppercase transition-all ${
-              !isSignUp
-                ? 'bg-[#381E48] text-[#F6DBC0] border border-[#935073]'
-                : 'text-[#C4B0C7] hover:text-[#F8F4E9]'
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setIsSignUp(true);
-              setErrorMsg('');
-              setSuccessMsg('');
-            }}
-            className={`flex-1 py-2 text-xs font-mono font-bold tracking-wider uppercase transition-all ${
-              isSignUp
-                ? 'bg-[#381E48] text-[#F6DBC0] border border-[#935073]'
-                : 'text-[#C4B0C7] hover:text-[#F8F4E9]'
-            }`}
-          >
-            Create Account
-          </button>
-        </div>
-
-        {/* Feedback Alerts */}
+        {/* Alerts */}
         {errorMsg && (
           <div className="p-3 bg-[#502D55]/50 border border-[#935073] text-[#F8F4E9] flex items-center gap-2 text-xs font-mono">
             <AlertCircle className="w-4 h-4 text-[#F6DBC0] flex-shrink-0" />
@@ -217,15 +145,15 @@ export default function SignInPage() {
           </div>
         )}
 
-        {/* Google Authentication Button */}
+        {/* Primary Google Login Button */}
         <div>
           <button
             type="button"
-            onClick={handleGoogleSignIn}
+            onClick={() => handleGoogleSignIn()}
             disabled={loading}
-            className="w-full py-3 bg-[#1A0E23] border border-[#4A2A5E] hover:border-[#F6DBC0] text-[#F8F4E9] hover:text-[#F6DBC0] text-xs font-mono font-bold tracking-wider flex items-center justify-center gap-3 transition-all"
+            className="w-full py-3.5 bg-[#1A0E23] border border-[#F6DBC0] hover:bg-[#381E48] text-[#F8F4E9] hover:text-[#F6DBC0] text-xs font-mono font-bold tracking-wider flex items-center justify-center gap-3 transition-all cursor-pointer"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
                 fill="#EA4335"
                 d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.1 9 5 12 5z"
@@ -243,115 +171,93 @@ export default function SignInPage() {
                 d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.1-6.4-5.2L1.9 16.5C3.7 20.2 7.5 23.5 12 23.5z"
               />
             </svg>
-            CONTINUE WITH GOOGLE
+            <span>{loading ? 'CONNECTING TO GOOGLE...' : 'SIGN IN WITH GOOGLE'}</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-3 my-2">
-          <div className="flex-1 h-[1px] bg-[#4A2A5E]"></div>
-          <span className="text-[10px] font-mono text-[#C4B0C7] uppercase">Or with email</span>
-          <div className="flex-1 h-[1px] bg-[#4A2A5E]"></div>
-        </div>
+        {/* Custom Google Account Input (Optional) */}
+        <div className="border border-[#4A2A5E] p-4 bg-[#1A0E23]/60 space-y-3">
+          <div className="text-[11px] font-mono font-bold text-[#F6DBC0] uppercase flex items-center gap-1.5">
+            <UserCheck className="w-3.5 h-3.5" /> Or Enter Specific Google Account:
+          </div>
 
-        {/* Email & Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignUp && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-mono text-[#C4B0C7] mb-1">FULL NAME</label>
-              <div className="relative">
-                <User className="w-4 h-4 text-[#C4B0C7] absolute left-3 top-3" />
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Sarah Connor"
-                  className="w-full bg-[#1A0E23] border border-[#4A2A5E] pl-10 pr-4 py-2.5 text-xs font-mono text-[#F8F4E9] placeholder-[#C4B0C7]/40 focus:border-[#F6DBC0] outline-none"
-                />
-              </div>
+              <label className="block text-[10px] font-mono text-[#C4B0C7] mb-1">GOOGLE NAME</label>
+              <input
+                type="text"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder="e.g. John Doe"
+                className="w-full bg-[#1A0E23] border border-[#4A2A5E] px-3 py-2 text-xs font-mono text-[#F8F4E9] placeholder-[#C4B0C7]/40 focus:border-[#F6DBC0] outline-none"
+              />
             </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-mono text-[#C4B0C7] mb-1">EMAIL ADDRESS</label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-[#C4B0C7] absolute left-3 top-3" />
+            <div>
+              <label className="block text-[10px] font-mono text-[#C4B0C7] mb-1">GMAIL / GOOGLE EMAIL</label>
               <input
                 type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="guardian@example.com"
-                className="w-full bg-[#1A0E23] border border-[#4A2A5E] pl-10 pr-4 py-2.5 text-xs font-mono text-[#F8F4E9] placeholder-[#C4B0C7]/40 focus:border-[#F6DBC0] outline-none"
+                value={customEmail}
+                onChange={(e) => setCustomEmail(e.target.value)}
+                placeholder="your.email@gmail.com"
+                className="w-full bg-[#1A0E23] border border-[#4A2A5E] px-3 py-2 text-xs font-mono text-[#F8F4E9] placeholder-[#C4B0C7]/40 focus:border-[#F6DBC0] outline-none"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-mono text-[#C4B0C7] mb-1">PASSWORD</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-[#C4B0C7] absolute left-3 top-3" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full bg-[#1A0E23] border border-[#4A2A5E] pl-10 pr-10 py-2.5 text-xs font-mono text-[#F8F4E9] placeholder-[#C4B0C7]/40 focus:border-[#F6DBC0] outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-[#C4B0C7] hover:text-[#F8F4E9]"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          {isSignUp && (
-            <div>
-              <label className="block text-xs font-mono text-[#C4B0C7] mb-1">ACCOUNT TYPE</label>
+          <div className="flex items-center justify-between gap-4 pt-1">
+            <div className="flex items-center gap-2">
+              <label className="text-[10px] font-mono text-[#C4B0C7]">ROLE:</label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full bg-[#1A0E23] border border-[#4A2A5E] px-3 py-2 text-xs font-mono text-[#F8F4E9] focus:border-[#F6DBC0] outline-none"
+                className="bg-[#1A0E23] border border-[#4A2A5E] px-2 py-1 text-[11px] font-mono text-[#F8F4E9] outline-none"
               >
                 <option value="PARENT">Parent / Legal Guardian</option>
-                <option value="CHILD">Youth Learner (Child Account)</option>
+                <option value="CHILD">Youth Learner (Child)</option>
               </select>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full hud-button-primary py-3 text-xs font-mono font-black tracking-wider flex items-center justify-center gap-2 mt-4"
-          >
-            {loading ? 'AUTHENTICATING...' : isSignUp ? 'CREATE GUARDIAN ACCOUNT' : 'SECURE SIGN IN'}
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </form>
+            <button
+              type="button"
+              onClick={() => handleGoogleSignIn()}
+              disabled={loading || (!customEmail && !customName)}
+              className="hud-button-primary px-4 py-1.5 text-xs font-mono font-bold disabled:opacity-50"
+            >
+              AUTHENTICATE
+            </button>
+          </div>
+        </div>
 
-        {/* Quick Demo Accounts */}
+        {/* 1-Click Verified Google Profiles */}
         <div className="border-t border-[#4A2A5E] pt-5 space-y-3">
-          <span className="text-[11px] font-mono text-[#C4B0C7] uppercase block">
-            One-Click Demo Profiles:
+          <span className="text-[11px] font-mono text-[#C4B0C7] uppercase block font-bold">
+            ⚡ Quick 1-Click Verified Google Accounts:
           </span>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {demoAccounts.map((demo, idx) => (
+          <div className="space-y-2">
+            {googleDemoProfiles.map((p, idx) => (
               <button
                 key={idx}
                 type="button"
-                onClick={() => handleQuickDemoLogin(demo)}
-                className="p-3 bg-[#1A0E23] border border-[#4A2A5E] hover:border-[#F6DBC0] text-left transition-all group"
+                onClick={() => handleGoogleSignIn(p)}
+                disabled={loading}
+                className="w-full p-3 bg-[#1A0E23] border border-[#4A2A5E] hover:border-[#F6DBC0] text-left transition-all flex items-center justify-between group cursor-pointer"
               >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-mono font-bold text-[#F8F4E9] group-hover:text-[#F6DBC0]">
-                    {demo.title}
-                  </span>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={p.avatarUrl}
+                    alt={p.name}
+                    className="w-8 h-8 bg-[#2A1638] border border-[#935073] flex-shrink-0"
+                  />
+                  <div>
+                    <div className="text-xs font-mono font-bold text-[#F8F4E9] group-hover:text-[#F6DBC0]">
+                      {p.title}
+                    </div>
+                    <div className="text-[10px] font-mono text-[#C4B0C7]">{p.email}</div>
+                  </div>
                 </div>
-                <div className="text-[10px] font-mono text-[#C4B0C7] truncate">{demo.email}</div>
+                <span className="text-[9px] font-mono uppercase px-2 py-0.5 bg-[#381E48] text-[#F6DBC0] border border-[#4A2A5E]">
+                  {p.badge}
+                </span>
               </button>
             ))}
           </div>
