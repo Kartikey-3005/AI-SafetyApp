@@ -96,6 +96,10 @@ export class DashboardService {
     };
   }
 
+  static async getSettings(childUserId) {
+    return inMemorySettings;
+  }
+
   static async updateSettings(childUserId, updateData) {
     inMemorySettings = { ...inMemorySettings, ...updateData };
     return inMemorySettings;
