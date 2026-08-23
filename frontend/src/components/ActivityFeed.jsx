@@ -29,7 +29,7 @@ export default function ActivityFeed({ logs = [] }) {
               key={log.id}
               className={`p-4 bg-[#1A0E23] border transition-all ${
                 isBlocked
-                  ? 'border-[#935073] hover:border-[#F6DBC0] shadow-[0_0_12px_rgba(147,80,115,0.3)]'
+                  ? 'border-[#935073] hover:border-[#F6DBC0]'
                   : 'border-[#4A2A5E] hover:border-[#F6DBC0]/50'
               }`}
             >
