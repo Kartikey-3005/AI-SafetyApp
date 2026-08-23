@@ -48,7 +48,11 @@ enum BlocklistCategory {
 model User {
   id           String        @id @default(uuid())
   email        String?       @unique
+  passwordHash String?
   name         String
+  avatarUrl    String?
+  authProvider String        @default("EMAIL") // "EMAIL", "GOOGLE"
+  googleId     String?       @unique
   role         Role          @default(PARENT)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
