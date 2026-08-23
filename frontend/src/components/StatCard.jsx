@@ -9,7 +9,7 @@ export default function StatCard({ title, value, unit = '', subtitle, trend, ico
       <div className="flex items-center justify-between">
         <span className="text-xs font-mono text-[#C4B0C7] uppercase tracking-wider">{title}</span>
         {Icon && (
-          <div className="p-2 bg-[#1A0E23] border border-[#4A2A5E] text-[#F6DBC0] shadow-[0_0_8px_rgba(246,219,192,0.2)]">
+          <div className="p-2 bg-[#1A0E23] border border-[#4A2A5E] text-[#F6DBC0]">
             <Icon className="w-4 h-4" />
           </div>
         )}
