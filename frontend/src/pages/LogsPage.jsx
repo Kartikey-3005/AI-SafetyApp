@@ -44,7 +44,7 @@ export default function LogsPage() {
               onClick={() => setFilterStatus(status)}
               className={`px-3 py-1.5 text-xs font-mono font-bold border transition-all ${
                 filterStatus === status
-                  ? 'bg-[#F6DBC0] text-[#1A0E23] border-[#F6DBC0] shadow-[0_0_10px_rgba(246,219,192,0.4)]'
+                  ? 'bg-[#F6DBC0] text-[#1A0E23] border-[#F6DBC0]'
                   : 'bg-[#2A1638] text-[#C4B0C7] border-[#4A2A5E] hover:border-[#F6DBC0]/50 hover:text-[#F8F4E9]'
               }`}
             >
