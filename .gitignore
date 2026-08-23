@@ -1,7 +1,27 @@
-frontend/node_modules
-backend/node_modules
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Environment Variables & Secrets
+.env
+.env.*
+*.env
 backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+!.env.example
+!backend/.env.example
+
+# IDE & OS Files
 .vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build Artifacts
 frontend/dist/
 dist/
+build/
 *.log
