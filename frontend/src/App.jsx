@@ -1,8 +1,9 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import LogsPage from './pages/LogsPage';
@@ -17,13 +18,54 @@ export default function App() {
         <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/logs" element={<LogsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/scan" element={<DemoScannerPage />} />
+            {/* Public Authentication Gate */}
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/signup" element={<SignInPage />} />
+
+            {/* Protected Routes (Google Authentication Required) */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <LandingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/logs"
+              element={
+                <ProtectedRoute>
+                  <LogsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/scan"
+              element={
+                <ProtectedRoute>
+                  <DemoScannerPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Catch-all fallback redirect */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
         <Footer />
