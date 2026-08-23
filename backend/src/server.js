@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import apiRouter from './routes/index.js';
 import { initRedis } from './config/redis.js';
+import { checkDatabaseConnection } from './config/prisma.js';
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ app.use((err, req, res, next) => {
 async function startServer() {
   try {
     await initRedis();
+    await checkDatabaseConnection();
     app.listen(PORT, () => {
       console.log(`\n🛡️ ============================================`);
       console.log(`🛡️ SafeKids AI Backend API live on port ${PORT}`);
