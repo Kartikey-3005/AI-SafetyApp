@@ -19,6 +19,16 @@ export default function DemoScannerPage() {
       text: 'Go to http://free-robux-generator-2026-login.xyz to claim 100,000 Robux instantly! Just type your password.',
     },
     {
+      title: 'Adult Website (Pornhub)',
+      app: 'Browser',
+      text: 'https://www.pornhub.com',
+    },
+    {
+      title: 'India DoT Banned (Desiflix)',
+      app: 'Browser',
+      text: 'https://desiflix.com',
+    },
+    {
       title: 'Harmless Homework Chat',
       app: 'Discord',
       text: 'Can you help me with question 4 on page 52 of our biology textbook?',
@@ -33,42 +43,85 @@ export default function DemoScannerPage() {
     setLoading(true);
     setResult(null);
 
-    try {
-      const res = await fetch('http://localhost:5000/api/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: 'user_child_01',
-          appSource: appToScan,
-          contentType: 'Direct Message',
-          content: textToScan,
-        }),
-      });
+    const isUrlMode =
+      appToScan === 'Browser' ||
+      textToScan.startsWith('http://') ||
+      textToScan.startsWith('https://') ||
+      textToScan.includes('.com') ||
+      textToScan.includes('.org') ||
+      textToScan.includes('.net') ||
+      textToScan.includes('.app');
 
-      if (res.ok) {
+    try {
+      if (isUrlMode) {
+        // Dedicated URL Gatekeeper inspection
+        const res = await fetch('http://localhost:5000/api/scan/url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: 'user_child_01',
+            url: textToScan,
+          }),
+        });
+
+        const data = await res.json();
+        if (res.status === 403 || data.status === 'BLOCKED') {
+          setResult({
+            status: 'BLOCKED',
+            threatCategory: data.flaggedLayer || 'Security Threat Filter',
+            childFriendlyExplanation: `🛡️ "Navigation halted: ${data.blockedReason || 'This destination is blocked for child protection.'}"`,
+          });
+        } else {
+          setResult({
+            status: 'ALLOWED',
+            threatCategory: 'Safe Browsing Verified',
+            childFriendlyExplanation: '✅ "Verified safe and secure browsing destination."',
+          });
+        }
+      } else {
+        // General text / chat message payload inspection
+        const res = await fetch('http://localhost:5000/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: 'user_child_01',
+            appSource: appToScan,
+            contentType: 'Direct Message',
+            content: textToScan,
+          }),
+        });
+
         const data = await res.json();
         setResult(data);
-      } else {
-        const isSuspicious =
-          textToScan.toLowerCase().includes('v-bucks') ||
-          textToScan.toLowerCase().includes('robux') ||
-          textToScan.toLowerCase().includes('password') ||
-          textToScan.toLowerCase().includes('street');
-
-        setResult({
-          status: isSuspicious ? 'BLOCKED' : 'ALLOWED',
-          threatCategory: isSuspicious ? 'Heuristic Threat Detection' : 'Safe Browsing Verified',
-          childFriendlyExplanation: isSuspicious
-            ? '🛡️ "Hold on! We paused this message because sharing private information or clicking free game reward links can be dangerous."'
-            : '✅ "Verified safe!"',
-        });
       }
     } catch (err) {
-      console.error('Scan failed:', err);
+      console.error('Scan failed, using client-side fallback heuristics:', err);
+      const lower = textToScan.toLowerCase();
+      const isAdult =
+        lower.includes('porn') ||
+        lower.includes('pornhub') ||
+        lower.includes('xxx') ||
+        lower.includes('sex') ||
+        lower.includes('onlyfans') ||
+        lower.includes('desiflix') ||
+        lower.includes('ullu');
+
+      const isSuspicious =
+        isAdult ||
+        lower.includes('v-bucks') ||
+        lower.includes('robux') ||
+        lower.includes('password') ||
+        lower.includes('street') ||
+        lower.includes('where do you live');
+
       setResult({
-        status: 'BLOCKED',
-        threatCategory: 'PII / Phishing Detection',
-        childFriendlyExplanation: '🛡️ "Hold on! We paused this message because sharing private information or clicking free game reward links can be dangerous."',
+        status: isSuspicious ? 'BLOCKED' : 'ALLOWED',
+        threatCategory: isAdult ? 'Explicit/Adult Content Detected' : (isSuspicious ? 'Heuristic Threat Detection' : 'Safe Browsing Verified'),
+        childFriendlyExplanation: isAdult
+          ? '🛡️ "Hold on! Explicit adult websites are blocked to keep you safe."'
+          : (isSuspicious
+            ? '🛡️ "Hold on! We paused this message because sharing private information or clicking unverified links can be dangerous."'
+            : '✅ "Verified safe!"'),
       });
     } finally {
       setLoading(false);
@@ -81,7 +134,7 @@ export default function DemoScannerPage() {
       <div className="border-b border-[#4A2A5E] pb-5">
         <h1 className="text-2xl font-black tracking-wider text-[#F8F4E9]">LIVE NEURAL SCANNER</h1>
         <p className="text-xs font-mono text-[#C4B0C7] mt-1">
-          Test real-time packet inspection and empathy coach explanations in Violet Dusk mode
+          Test real-time packet inspection, explicit content defense, and empathy coach explanations
         </p>
       </div>
 
@@ -165,7 +218,7 @@ export default function DemoScannerPage() {
               ACTION: {result.status}
             </span>
             <span className="text-xs font-mono text-[#C4B0C7] ml-auto">
-              Category: {result.threatCategory || 'N/A'}
+              Category: {result.threatCategory || result.threatType || 'N/A'}
             </span>
           </div>
 
