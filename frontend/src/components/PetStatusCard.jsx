@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Heart, Flame } from 'lucide-react';
+import { Shield, Heart, Flame } from 'lucide-react';
 
 export default function PetStatusCard({ pet = {} }) {
   const {
@@ -18,17 +18,17 @@ export default function PetStatusCard({ pet = {} }) {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         {/* Pet Avatar & Identity */}
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-[#1A0E23] border-2 border-[#F6DBC0] flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(246,219,192,0.3)]">
+          <div className="w-16 h-16 bg-[#1A0E23] border border-[#F6DBC0] flex items-center justify-center text-2xl">
             🐉
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-black text-[#F8F4E9] tracking-wider">{petName}</h3>
-              <span className="px-2 py-0.5 bg-[#502D55] border border-[#935073] text-[#F6DBC0] text-xs font-mono font-bold shadow-[0_0_8px_rgba(147,80,115,0.4)]">
+              <span className="px-2 py-0.5 bg-[#502D55] border border-[#935073] text-[#F6DBC0] text-xs font-mono font-bold">
                 LVL {petLevel}
               </span>
             </div>
-            <p className="text-xs text-[#C4B0C7] font-mono mt-0.5">Violet Dusk Guardian Companion</p>
+            <p className="text-xs text-[#C4B0C7] font-mono mt-0.5">Guardian Digital Companion</p>
           </div>
         </div>
 
@@ -51,9 +51,9 @@ export default function PetStatusCard({ pet = {} }) {
           <span className="text-[#C4B0C7]">XP PROGRESSION</span>
           <span className="text-[#F6DBC0] font-bold">{currentXp} / {xpToNextLevel} XP ({progressPercent}%)</span>
         </div>
-        <div className="w-full h-3.5 bg-[#1A0E23] border border-[#4A2A5E] p-[2px]">
+        <div className="w-full h-3 bg-[#1A0E23] border border-[#4A2A5E] p-[1px]">
           <div
-            className="h-full bg-gradient-to-r from-[#502D55] via-[#935073] to-[#F6DBC0] shadow-[0_0_12px_rgba(147,80,115,0.6)] transition-all duration-500"
+            className="h-full bg-[#935073] transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
           ></div>
         </div>
