@@ -1,12 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Shield, Lock, CheckCircle, AlertCircle, ArrowRight, Sparkles, UserCheck } from 'lucide-react';
+import { Shield, Lock, CheckCircle, AlertCircle, ArrowRight, Sparkles, UserCheck, ShieldCheck, KeyRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+
+// Decode Google JWT ID token payload if official Google GIS is triggered
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
 
 export default function SignInPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { loginWithGoogle, user, logout } = useAuth();
+  const googleBtnRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -14,6 +32,7 @@ export default function SignInPage() {
   const [customEmail, setCustomEmail] = useState('');
   const [customName, setCustomName] = useState('');
   const [role, setRole] = useState('PARENT');
+  const [googleClientReady, setGoogleClientReady] = useState(false);
 
   // Destination path (redirect back to wherever user was trying to go)
   const fromPath = location.state?.from?.pathname || '/dashboard';
@@ -46,6 +65,42 @@ export default function SignInPage() {
     },
   ];
 
+  // Try mounting Google Identity Services if a client ID is available
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (window.google?.accounts?.id && clientId && googleBtnRef.current) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response) => {
+            if (response.credential) {
+              const decoded = parseJwt(response.credential);
+              if (decoded) {
+                await handleGoogleSignIn({
+                  name: decoded.name || decoded.email?.split('@')[0],
+                  email: decoded.email,
+                  googleId: decoded.sub,
+                  avatarUrl: decoded.picture || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(decoded.name)}`,
+                  role: role || 'PARENT',
+                });
+              }
+            }
+          },
+        });
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: 'outline',
+          size: 'large',
+          width: '100%',
+          text: 'signin_with',
+          shape: 'rectangular',
+        });
+        setGoogleClientReady(true);
+      } catch (e) {
+        console.log('Google Identity button setup notice:', e);
+      }
+    }
+  }, [role]);
+
   const handleGoogleSignIn = async (profileOverride = null) => {
     setErrorMsg('');
     setSuccessMsg('');
@@ -65,7 +120,7 @@ export default function SignInPage() {
         setSuccessMsg(`Google Authentication Verified for ${result.user.name}!`);
         setTimeout(() => {
           navigate(fromPath, { replace: true });
-        }, 700);
+        }, 600);
       } else {
         setErrorMsg(result.error || 'Google login failed.');
       }
@@ -145,13 +200,15 @@ export default function SignInPage() {
           </div>
         )}
 
-        {/* Primary Google Login Button */}
-        <div>
+        {/* Official Google Identity Button (Mount Point) & Fast-Auth Trigger */}
+        <div className="space-y-3">
+          <div ref={googleBtnRef} className="w-full min-h-[44px] flex items-center justify-center"></div>
+
           <button
             type="button"
             onClick={() => handleGoogleSignIn()}
             disabled={loading}
-            className="w-full py-3.5 bg-[#1A0E23] border border-[#F6DBC0] hover:bg-[#381E48] text-[#F8F4E9] hover:text-[#F6DBC0] text-xs font-mono font-bold tracking-wider flex items-center justify-center gap-3 transition-all cursor-pointer"
+            className="w-full py-3.5 bg-[#1A0E23] border border-[#F6DBC0] hover:bg-[#381E48] text-[#F8F4E9] hover:text-[#F6DBC0] text-xs font-mono font-bold tracking-wider flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm hover:border-[#F8F4E9]"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -171,7 +228,7 @@ export default function SignInPage() {
                 d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.1-6.4-5.2L1.9 16.5C3.7 20.2 7.5 23.5 12 23.5z"
               />
             </svg>
-            <span>{loading ? 'CONNECTING TO GOOGLE...' : 'SIGN IN WITH GOOGLE'}</span>
+            <span>{loading ? 'CONNECTING TO GOOGLE OAUTH...' : 'SIGN IN WITH GOOGLE'}</span>
           </button>
         </div>
 

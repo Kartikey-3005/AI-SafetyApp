@@ -18,13 +18,23 @@ export default function App() {
         <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Routes>
-            {/* Public Authentication Gate */}
+            {/* Public Authentication Gates */}
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/signup" element={<SignInPage />} />
 
-            {/* Protected Routes (Google Authentication Required) */}
+            {/* Root Route: If not logged in, user gets Google Login immediately. If logged in, goes to Dashboard */}
             <Route
               path="/"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Routes (Google Authentication Required) */}
+            <Route
+              path="/overview"
               element={
                 <ProtectedRoute>
                   <LandingPage />
