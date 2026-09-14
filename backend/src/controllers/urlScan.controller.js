@@ -1,214 +1,204 @@
-import crypto from 'crypto';
-import prisma, { isDbConnected } from '../config/prisma.js';
-import { redisClient } from '../config/redis.js';
 import { ScanService } from '../services/scan.service.js';
 import {
   parseAndNormalizeUrl,
-  checkIndiaRegionalBlocklist,
-  checkHeuristicsThreats,
-  checkGoogleSafeBrowsing,
+  evaluateTier1Heuristics,
+  checkRedisScanCache,
+  queryGoogleSafeBrowsing,
+  persistScanResult,
 } from '../services/urlScanner.service.js';
-
-const URL_CACHE_TTL = 86400; // 24 Hours
 
 /**
  * Controller: POST /api/scan/url
- * Strict gatekeeper endpoint evaluating URLs against 4 threat vectors
+ * Strict Multi-Tier URL Inspection Pipeline
+ * 1. URL Normalization
+ * 2. Tier 1 - Heuristics & Regional Compliance (Instant Local Filtering -> HTTP 403)
+ * 3. Tier 2 - Cache Lookup (Redis: scan:{hostname})
+ * 4. Tier 3 - Google Safe Browsing API (Threat Database)
+ * 5. Tier 4 - Database Persistence (Prisma ActivityLog) & Caching (Redis 24h TTL)
  */
 export async function scanUrlHandler(req, res) {
   try {
     const { url, userId = 'user_child_01' } = req.body;
 
-    if (!url || typeof url !== 'string') {
+    if (!url || typeof url !== 'string' || !url.trim()) {
       return res.status(400).json({
         error: 'Invalid Request',
         message: 'A valid "url" string is required in the request body.',
       });
     }
 
-    // 1. Canonical Parsing & Normalization
+    // Step 1: URL Normalization
     let parsedData;
     try {
       parsedData = parseAndNormalizeUrl(url);
     } catch (parseErr) {
       return res.status(400).json({
         error: 'Malformed URL',
-        message: parseErr.message,
+        message: 'Unable to parse provided destination as a valid URL.',
       });
     }
 
-    const { rawUrl, normalizedUrl, hostname } = parsedData;
+    const { rawUrl, hostname } = parsedData;
 
-    // 2. Check Redis Scan Cache
-    const urlHash = crypto.createHash('sha256').update(normalizedUrl).digest('hex');
-    const scanCacheKey = `url_scan:${urlHash}`;
-
-    try {
-      const cached = await redisClient.get(scanCacheKey);
-      if (cached) {
-        const cachedResult = JSON.parse(cached);
-
-        // If cached as blocked, return 403 Forbidden
-        if (cachedResult.status === 'BLOCKED') {
-          return res.status(403).json({
-            status: 'BLOCKED',
-            url: rawUrl,
-            blockedReason: cachedResult.reason,
-            flaggedLayer: cachedResult.layer,
-            fromCache: true,
-          });
-        }
-
-        // If cached as allowed, return 200 OK
-        return res.status(200).json({
-          status: 'ALLOWED',
-          url: rawUrl,
-          message: 'URL verified safe.',
-          fromCache: true,
-        });
-      }
-    } catch (redisErr) {
-      console.warn('[Redis] Scan cache lookup notice:', redisErr.message);
-    }
-
-    // 3. Sequential Security Pipeline
-    let threatResult = null;
-
-    // Layer 1: Regional Compliance (India Blocklist)
-    threatResult = await checkIndiaRegionalBlocklist(hostname);
-
-    // Layer 2: The Heuristics Engine (IPs, HTTP, Risk TLDs)
-    if (!threatResult.isThreat) {
-      threatResult = checkHeuristicsThreats(parsedData);
-    }
-
-    // Layer 3: Google Safe Browsing API (Malware / Phishing)
-    if (!threatResult.isThreat) {
-      threatResult = await checkGoogleSafeBrowsing(rawUrl);
-    }
-
-    // 4. Handle BLOCKED Verdict (Failed ANY Layer)
-    if (threatResult.isThreat) {
-      const cachePayload = {
+    // Step 2: Tier 1 - Heuristics & Regional Compliance (Instant Local Filtering)
+    const tier1Result = await evaluateTier1Heuristics(parsedData);
+    if (tier1Result.isThreat) {
+      // Immediately log and return HTTP 403 without querying external APIs
+      await persistScanResult({
+        userId,
+        url: rawUrl,
+        hostname,
         status: 'BLOCKED',
-        reason: threatResult.reason,
-        layer: threatResult.layer,
-      };
+        category: tier1Result.category,
+        threatType: tier1Result.threatType,
+        explanation: tier1Result.childFriendlyExplanation,
+        reason: tier1Result.reason,
+        layer: tier1Result.layer,
+        fromCache: false,
+      });
 
-      // Cache the Block verdict in Redis
-      try {
-        await redisClient.set(scanCacheKey, JSON.stringify(cachePayload), {
-          EX: URL_CACHE_TTL,
-        });
-      } catch (err) {
-        console.warn('[Redis] Cache write failed:', err.message);
-      }
-
-      // Memory log sync for dashboard feeds
-      const memoryLogs = ScanService.getMemoryLogs();
-      memoryLogs.unshift({
+      // Synchronize in-memory feed for instant UI sync
+      ScanService.getMemoryLogs().unshift({
         id: `LOG-${Date.now().toString().slice(-4)}`,
         timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-        appSource: 'Web Browser',
+        appSource: 'Browser',
         contentType: 'URL Navigation',
         status: 'Blocked',
-        threatCategory: threatResult.layer === 'LAYER_1_REGIONAL' ? 'Regional Blocklist Violation' : 'Insecure / Malicious URL',
+        threatCategory: tier1Result.category,
         flaggedContent: rawUrl,
-        childFriendlyExplanation: `🛡️ "This link was blocked: ${threatResult.reason}"`,
+        childFriendlyExplanation: tier1Result.childFriendlyExplanation,
       });
-
-      // Persist to database if available
-      if (isDbConnected() && prisma?.activityLog) {
-        prisma.activityLog.create({
-          data: {
-            userId,
-            content: rawUrl,
-            contentType: 'URL',
-            appSource: 'Web Browser',
-            scannedUrl: rawUrl,
-            normalizedHost: hostname,
-            status: 'BLOCKED',
-            threatType: 'PHISHING',
-            severityScore: 1.0,
-            blockedReason: threatResult.reason,
-            flaggedLayer: threatResult.layer,
-            fromCache: false,
-            parentDiagnosticReason: threatResult.reason,
-            childFriendlyExplanation: `🛡️ "This link was blocked: ${threatResult.reason}"`,
-          },
-        }).catch((e) => console.warn('[DB] Log creation failed:', e.message));
-      }
 
       return res.status(403).json({
         status: 'BLOCKED',
         url: rawUrl,
-        blockedReason: threatResult.reason,
-        flaggedLayer: threatResult.layer,
+        hostname,
+        category: tier1Result.category,
+        blockedReason: tier1Result.reason,
+        childFriendlyExplanation: tier1Result.childFriendlyExplanation,
+        flaggedLayer: tier1Result.layer,
         fromCache: false,
       });
     }
 
-    // 5. Handle ALLOWED Verdict (Passed all layers)
-    const safePayload = {
-      status: 'ALLOWED',
-      reason: null,
-      layer: null,
-    };
+    // Step 3: Tier 2 - Cache Lookup (Redis: scan:{normalizedHostname})
+    const cacheResult = await checkRedisScanCache(hostname);
+    if (cacheResult.found && cacheResult.data) {
+      const cached = cacheResult.data;
 
-    // Cache the Safe verdict in Redis
-    try {
-      await redisClient.set(scanCacheKey, JSON.stringify(safePayload), {
-        EX: URL_CACHE_TTL,
+      // Synchronize in-memory feed
+      ScanService.getMemoryLogs().unshift({
+        id: `LOG-${Date.now().toString().slice(-4)}`,
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        appSource: 'Browser',
+        contentType: 'URL Navigation',
+        status: cached.status === 'BLOCKED' ? 'Blocked' : 'Allowed',
+        threatCategory: cached.category || 'Safe Browsing Verified',
+        flaggedContent: rawUrl,
+        childFriendlyExplanation: cached.explanation,
       });
-    } catch (err) {
-      console.warn('[Redis] Cache write failed:', err.message);
+
+      if (cached.status === 'BLOCKED') {
+        return res.status(403).json({
+          status: 'BLOCKED',
+          url: rawUrl,
+          hostname,
+          category: cached.category,
+          blockedReason: cached.reason,
+          childFriendlyExplanation: cached.explanation,
+          flaggedLayer: cached.layer || 'TIER_2_CACHE',
+          fromCache: true,
+        });
+      }
+
+      return res.status(200).json({
+        status: 'ALLOWED',
+        url: rawUrl,
+        hostname,
+        category: 'Safe Browsing Verified',
+        childFriendlyExplanation: cached.explanation || '✅ "Verified safe and secure browsing destination."',
+        fromCache: true,
+      });
     }
 
-    // Memory log sync for dashboard feeds
-    const memoryLogs = ScanService.getMemoryLogs();
-    memoryLogs.unshift({
+    // Step 4: Tier 3 - Google Safe Browsing API (Threat Database)
+    const gsbResult = await queryGoogleSafeBrowsing(rawUrl);
+    if (gsbResult.isThreat) {
+      await persistScanResult({
+        userId,
+        url: rawUrl,
+        hostname,
+        status: 'BLOCKED',
+        category: gsbResult.category,
+        threatType: gsbResult.threatType,
+        explanation: gsbResult.childFriendlyExplanation,
+        reason: gsbResult.reason,
+        layer: gsbResult.layer,
+        fromCache: false,
+      });
+
+      ScanService.getMemoryLogs().unshift({
+        id: `LOG-${Date.now().toString().slice(-4)}`,
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        appSource: 'Browser',
+        contentType: 'URL Navigation',
+        status: 'Blocked',
+        threatCategory: gsbResult.category,
+        flaggedContent: rawUrl,
+        childFriendlyExplanation: gsbResult.childFriendlyExplanation,
+      });
+
+      return res.status(403).json({
+        status: 'BLOCKED',
+        url: rawUrl,
+        hostname,
+        category: gsbResult.category,
+        blockedReason: gsbResult.reason,
+        childFriendlyExplanation: gsbResult.childFriendlyExplanation,
+        flaggedLayer: gsbResult.layer,
+        fromCache: false,
+      });
+    }
+
+    // Step 5: Tier 4 - Database Persistence & Caching (Safe Verdict)
+    const safeExplanation = '✅ "Verified safe and secure browsing destination."';
+    await persistScanResult({
+      userId,
+      url: rawUrl,
+      hostname,
+      status: 'ALLOWED',
+      category: 'Safe Browsing Verified',
+      threatType: 'NONE',
+      explanation: safeExplanation,
+      reason: null,
+      layer: 'CLEAN',
+      fromCache: false,
+    });
+
+    ScanService.getMemoryLogs().unshift({
       id: `LOG-${Date.now().toString().slice(-4)}`,
       timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      appSource: 'Web Browser',
+      appSource: 'Browser',
       contentType: 'URL Navigation',
       status: 'Allowed',
       threatCategory: 'Safe Browsing Verified',
       flaggedContent: rawUrl,
-      childFriendlyExplanation: '✅ "Verified safe and secure browsing destination."',
+      childFriendlyExplanation: safeExplanation,
     });
-
-    // Persist to database if available
-    if (isDbConnected() && prisma?.activityLog) {
-      prisma.activityLog.create({
-        data: {
-          userId,
-          content: rawUrl,
-          contentType: 'URL',
-          appSource: 'Web Browser',
-          scannedUrl: rawUrl,
-          normalizedHost: hostname,
-          status: 'ALLOWED',
-          threatType: 'NONE',
-          severityScore: 0.0,
-          blockedReason: null,
-          flaggedLayer: null,
-          fromCache: false,
-          childFriendlyExplanation: '✅ "Verified safe and secure browsing destination."',
-        },
-      }).catch((e) => console.warn('[DB] Log creation failed:', e.message));
-    }
 
     return res.status(200).json({
       status: 'ALLOWED',
       url: rawUrl,
-      message: 'URL passed all security vectors and is verified safe.',
+      hostname,
+      category: 'Safe Browsing Verified',
+      childFriendlyExplanation: safeExplanation,
       fromCache: false,
     });
   } catch (error) {
-    console.error('Unhandled URL Scanner Error:', error);
+    console.error('Unhandled URL Scanner Controller Error:', error);
     return res.status(500).json({
       error: 'Internal Server Error',
-      message: 'Failed to complete URL safety evaluation pipeline.',
+      message: 'Failed to complete URL safety inspection pipeline.',
     });
   }
 }
