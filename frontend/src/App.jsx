@@ -14,7 +14,7 @@ import SignInPage from './pages/SignInPage';
 export default function App() {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-[#1A0E23] text-[#F8F4E9] flex flex-col font-sans selection:bg-[#935073] selection:text-[#F8F4E9]">
+      <div className="min-h-screen bg-[#161E2F] text-[#FFF1EB] flex flex-col font-sans selection:bg-[#B51A2B] selection:text-[#FFF1EB]">
         <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Routes>
