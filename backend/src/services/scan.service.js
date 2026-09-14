@@ -6,8 +6,7 @@ import { checkOpenAiModeration } from '../integrations/openAiModeration.js';
 import { generateChildFriendlyExplanation } from '../integrations/openAiExplainer.js';
 import {
   parseAndNormalizeUrl,
-  checkIndiaRegionalBlocklist,
-  checkHeuristicsThreats,
+  evaluateTier1Heuristics,
   adultKeywords,
 } from './urlScanner.service.js';
 
@@ -68,20 +67,12 @@ export class ScanService {
     if (!isBlocked && isUrl) {
       try {
         const parsed = parseAndNormalizeUrl(content);
-        const regionalCheck = await checkIndiaRegionalBlocklist(parsed.hostname);
-        if (regionalCheck.isThreat) {
+        const tier1Check = await evaluateTier1Heuristics(parsed);
+        if (tier1Check.isThreat) {
           isBlocked = true;
-          threatType = 'PHISHING';
+          threatType = tier1Check.threatType || 'PHISHING';
           severityScore = 1.0;
-          parentReason = regionalCheck.reason;
-        } else {
-          const heuristicsCheck = checkHeuristicsThreats(parsed);
-          if (heuristicsCheck.isThreat) {
-            isBlocked = true;
-            threatType = heuristicsCheck.reason.includes('Adult') ? 'TOXICITY' : 'PHISHING';
-            severityScore = 0.95;
-            parentReason = heuristicsCheck.reason;
-          }
+          parentReason = tier1Check.reason;
         }
       } catch (e) {
         // Not a standard URL, continue with moderation
