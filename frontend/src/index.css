@@ -8,8 +8,8 @@
   }
   
   body {
-    background-color: #1A0E23;
-    color: #F8F4E9;
+    background-color: #161E2F;
+    color: #FFF1EB;
     font-family: 'Inter', system-ui, sans-serif;
     overflow-x: hidden;
     min-height: 100vh;
@@ -20,43 +20,43 @@
   }
 }
 
-/* Custom Violet Dusk Clean HUD Cards */
+/* Custom Clean HUD Cards & Controls */
 .hud-card {
-  background-color: #2A1638;
-  border: 1px solid #4A2A5E;
+  background-color: #242F49;
+  border: 1px solid #384358;
   position: relative;
   transition: border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 
 .hud-card:hover {
-  border-color: #935073;
+  border-color: #FFA586;
 }
 
 .hud-button-primary {
-  background-color: #935073;
-  color: #F8F4E9;
+  background-color: #B51A2B;
+  color: #FFF1EB;
   font-weight: 700;
-  border: 1px solid #F6DBC0;
+  border: 1px solid #FFA586;
   transition: all 0.2s ease-in-out;
 }
 
 .hud-button-primary:hover {
-  background-color: #F6DBC0;
-  color: #1A0E23;
-  border-color: #F6DBC0;
+  background-color: #FFA586;
+  color: #161E2F;
+  border-color: #FFA586;
 }
 
 .hud-button-secondary {
-  background-color: #2A1638;
-  color: #F8F4E9;
-  border: 1px solid #4A2A5E;
+  background-color: #242F49;
+  color: #FFF1EB;
+  border: 1px solid #384358;
   transition: all 0.2s ease-in-out;
 }
 
 .hud-button-secondary:hover {
-  border-color: #F6DBC0;
-  color: #F6DBC0;
-  background-color: #381E48;
+  border-color: #FFA586;
+  color: #FFA586;
+  background-color: #2E3B5B;
 }
 
 /* Custom scrollbar */
@@ -65,11 +65,11 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #1A0E23;
+  background: #161E2F;
 }
 ::-webkit-scrollbar-thumb {
-  background: #4A2A5E;
+  background: #384358;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #935073;
+  background: #FFA586;
 }
