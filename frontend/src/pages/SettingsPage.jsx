@@ -81,10 +81,10 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4A2A5E] pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#384358] pb-5">
         <div>
-          <h1 className="text-2xl font-black tracking-wider text-[#F8F4E9]">GUARDIAN SETTINGS</h1>
-          <p className="text-xs font-mono text-[#C4B0C7] mt-1">
+          <h1 className="text-2xl font-black tracking-wider text-[#FFF1EB]">GUARDIAN SETTINGS</h1>
+          <p className="text-xs font-mono text-[#A2B0C7] mt-1">
             Configure Real-Time AI Interception Thresholds & Platform Integrations
           </p>
         </div>
@@ -109,17 +109,17 @@ export default function SettingsPage() {
       </div>
 
       {savedSuccess && (
-        <div className="p-4 bg-[#502D55]/60 border border-[#F6DBC0] text-[#F8F4E9] flex items-center gap-3 font-mono text-xs">
-          <CheckCircle className="w-5 h-5 text-[#F6DBC0]" />
+        <div className="p-4 bg-[#541A2E]/60 border border-[#FFA586] text-[#FFF1EB] flex items-center gap-3 font-mono text-xs">
+          <CheckCircle className="w-5 h-5 text-[#FFA586]" />
           <span>Guardian safety policies and telemetry settings successfully updated & synced across all endpoints.</span>
         </div>
       )}
 
       {/* Strictness Level Selector */}
       <div className="hud-card p-6 space-y-4">
-        <div className="flex items-center gap-2 border-b border-[#4A2A5E] pb-3">
-          <Shield className="w-5 h-5 text-[#F6DBC0]" />
-          <h2 className="text-sm font-bold text-[#F8F4E9] uppercase tracking-wider font-mono">
+        <div className="flex items-center gap-2 border-b border-[#384358] pb-3">
+          <Shield className="w-5 h-5 text-[#FFA586]" />
+          <h2 className="text-sm font-bold text-[#FFF1EB] uppercase tracking-wider font-mono">
             AI Threat Inspection Strictness
           </h2>
         </div>
@@ -151,23 +151,23 @@ export default function SettingsPage() {
               }}
               className={`p-4 text-left border transition-all ${
                 settings.strictness === item.level
-                  ? 'bg-[#381E48] border-[#F6DBC0]'
-                  : 'bg-[#1A0E23] border-[#4A2A5E] hover:border-[#935073]'
+                  ? 'bg-[#2E3B5B] border-[#FFA586]'
+                  : 'bg-[#161E2F] border-[#384358] hover:border-[#FFA586]'
               }`}
             >
               <div className="flex items-center justify-between mb-1">
                 <span
                   className={`font-mono text-xs font-bold uppercase ${
-                    settings.strictness === item.level ? 'text-[#F6DBC0]' : 'text-[#F8F4E9]'
+                    settings.strictness === item.level ? 'text-[#FFA586]' : 'text-[#FFF1EB]'
                   }`}
                 >
                   {item.label}
                 </span>
                 {settings.strictness === item.level && (
-                  <span className="w-2 h-2 bg-[#F6DBC0]"></span>
+                  <span className="w-2 h-2 bg-[#FFA586]"></span>
                 )}
               </div>
-              <p className="text-[11px] text-[#C4B0C7] leading-relaxed mt-2">{item.desc}</p>
+              <p className="text-[11px] text-[#A2B0C7] leading-relaxed mt-2">{item.desc}</p>
             </button>
           ))}
         </div>
@@ -175,14 +175,14 @@ export default function SettingsPage() {
 
       {/* Core Defense Toggles */}
       <div className="hud-card p-6 space-y-5">
-        <div className="flex items-center gap-2 border-b border-[#4A2A5E] pb-3">
-          <Lock className="w-5 h-5 text-[#935073]" />
-          <h2 className="text-sm font-bold text-[#F8F4E9] uppercase tracking-wider font-mono">
+        <div className="flex items-center gap-2 border-b border-[#384358] pb-3">
+          <Lock className="w-5 h-5 text-[#B51A2B]" />
+          <h2 className="text-sm font-bold text-[#FFF1EB] uppercase tracking-wider font-mono">
             Core Protection Modules
           </h2>
         </div>
 
-        <div className="space-y-4 divide-y divide-[#4A2A5E]/60">
+        <div className="space-y-4 divide-y divide-[#384358]/60">
           {[
             {
               key: 'aiModerationEnabled',
@@ -212,21 +212,21 @@ export default function SettingsPage() {
           ].map((item) => (
             <div key={item.key} className="pt-4 first:pt-0 flex items-start justify-between gap-4">
               <div className="space-y-1">
-                <div className="text-xs font-mono font-bold text-[#F8F4E9]">{item.title}</div>
-                <div className="text-xs text-[#C4B0C7] leading-relaxed">{item.desc}</div>
+                <div className="text-xs font-mono font-bold text-[#FFF1EB]">{item.title}</div>
+                <div className="text-xs text-[#A2B0C7] leading-relaxed">{item.desc}</div>
               </div>
               <button
                 type="button"
                 onClick={() => handleToggle(item.key)}
                 className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer border transition-colors duration-200 ease-in-out ${
                   settings[item.key]
-                    ? 'bg-[#935073] border-[#F6DBC0]'
-                    : 'bg-[#1A0E23] border-[#4A2A5E]'
+                    ? 'bg-[#B51A2B] border-[#FFA586]'
+                    : 'bg-[#161E2F] border-[#384358]'
                 }`}
               >
                 <span
                   className={`pointer-events-none inline-block h-5 w-5 transform transition duration-200 ease-in-out ${
-                    settings[item.key] ? 'translate-x-5 bg-[#F6DBC0]' : 'translate-x-0 bg-[#F8F4E9]'
+                    settings[item.key] ? 'translate-x-5 bg-[#FFA586]' : 'translate-x-0 bg-[#FFF1EB]'
                   }`}
                 />
               </button>
@@ -237,9 +237,9 @@ export default function SettingsPage() {
 
       {/* Connected Platforms */}
       <div className="hud-card p-6 space-y-4">
-        <div className="flex items-center gap-2 border-b border-[#4A2A5E] pb-3">
-          <Smartphone className="w-5 h-5 text-[#F6DBC0]" />
-          <h2 className="text-sm font-bold text-[#F8F4E9] uppercase tracking-wider font-mono">
+        <div className="flex items-center gap-2 border-b border-[#384358] pb-3">
+          <Smartphone className="w-5 h-5 text-[#FFA586]" />
+          <h2 className="text-sm font-bold text-[#FFF1EB] uppercase tracking-wider font-mono">
             Connected Protected Platforms
           </h2>
         </div>
@@ -256,23 +256,23 @@ export default function SettingsPage() {
               onClick={() => handlePlatformToggle(plat.key)}
               className={`p-4 border cursor-pointer transition-all ${
                 platforms[plat.key]
-                  ? 'bg-[#1A0E23] border-[#935073]'
-                  : 'bg-[#1A0E23]/50 border-[#4A2A5E] opacity-50'
+                  ? 'bg-[#161E2F] border-[#B51A2B]'
+                  : 'bg-[#161E2F]/50 border-[#384358] opacity-50'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-bold text-[#F8F4E9]">{plat.name}</span>
+                <span className="text-xs font-mono font-bold text-[#FFF1EB]">{plat.name}</span>
                 <span
                   className={`text-[9px] font-mono px-1.5 py-0.5 border ${
                     platforms[plat.key]
-                      ? 'bg-[#502D55] text-[#F6DBC0] border-[#935073]'
-                      : 'bg-[#2A1638] text-[#C4B0C7] border-[#4A2A5E]'
+                      ? 'bg-[#541A2E] text-[#FFA586] border-[#B51A2B]'
+                      : 'bg-[#242F49] text-[#A2B0C7] border-[#384358]'
                   }`}
                 >
                   {platforms[plat.key] ? 'SYNCED' : 'PAUSED'}
                 </span>
               </div>
-              <div className="text-[10px] font-mono text-[#C4B0C7]">
+              <div className="text-[10px] font-mono text-[#A2B0C7]">
                 {platforms[plat.key] ? '● Intercepting telemetry' : '○ Protection paused'}
               </div>
             </div>
