@@ -79,10 +79,10 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4A2A5E] pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#384358] pb-5">
         <div>
-          <h1 className="text-2xl font-black tracking-wider text-[#F8F4E9]">COMMAND DASHBOARD</h1>
-          <p className="text-xs font-mono text-[#C4B0C7] mt-1">
+          <h1 className="text-2xl font-black tracking-wider text-[#FFF1EB]">COMMAND DASHBOARD</h1>
+          <p className="text-xs font-mono text-[#A2B0C7] mt-1">
             Real-Time Guardian Telemetry & Child Protection Engine
           </p>
         </div>
