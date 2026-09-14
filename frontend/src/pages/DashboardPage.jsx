@@ -4,6 +4,8 @@ import StatCard from '../components/StatCard';
 import PetStatusCard from '../components/PetStatusCard';
 import ActivityFeed from '../components/ActivityFeed';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function DashboardPage() {
   const [summary, setSummary] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -12,13 +14,15 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const summaryRes = await fetch('http://localhost:5000/api/dashboard/summary?userId=user_child_01');
+      const summaryRes = await fetch(`${API_BASE_URL}/api/dashboard/summary?userId=user_child_01`);
       if (summaryRes.ok) {
         const data = await summaryRes.json();
         setSummary(data);
       } else {
-        // Fallback mock
+        // Fallback
         setSummary({
+          totalBlocked: 42,
+          totalAllowed: 86,
           threatsBlockedWeekly: 42,
           contentFilteredWeekly: 128,
           safeHoursLogged: 36.5,
@@ -34,7 +38,7 @@ export default function DashboardPage() {
         });
       }
 
-      const logsRes = await fetch('http://localhost:5000/api/dashboard/logs?userId=user_child_01&limit=5');
+      const logsRes = await fetch(`${API_BASE_URL}/api/dashboard/logs?userId=user_child_01&limit=5`);
       if (logsRes.ok) {
         const data = await logsRes.json();
         setLogs(data.logs || []);
