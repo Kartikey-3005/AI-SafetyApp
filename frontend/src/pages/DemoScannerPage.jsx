@@ -131,16 +131,16 @@ export default function DemoScannerPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
-      <div className="border-b border-[#4A2A5E] pb-5">
-        <h1 className="text-2xl font-black tracking-wider text-[#F8F4E9]">LIVE NEURAL SCANNER</h1>
-        <p className="text-xs font-mono text-[#C4B0C7] mt-1">
+      <div className="border-b border-[#384358] pb-5">
+        <h1 className="text-2xl font-black tracking-wider text-[#FFF1EB]">LIVE NEURAL SCANNER</h1>
+        <p className="text-xs font-mono text-[#A2B0C7] mt-1">
           Test real-time packet inspection, explicit content defense, and empathy coach explanations
         </p>
       </div>
 
       {/* Preset Buttons */}
       <div className="space-y-2">
-        <span className="text-xs font-mono text-[#C4B0C7] uppercase">Quick Test Presets:</span>
+        <span className="text-xs font-mono text-[#A2B0C7] uppercase">Quick Test Presets:</span>
         <div className="flex flex-wrap gap-2">
           {presets.map((p, idx) => (
             <button
@@ -150,9 +150,9 @@ export default function DemoScannerPage() {
                 setAppSource(p.app);
                 handleScan(p.text, p.app);
               }}
-              className="px-3 py-1.5 bg-[#2A1638] border border-[#4A2A5E] hover:border-[#F6DBC0] text-xs font-mono text-[#F8F4E9] transition-all flex items-center gap-1.5"
+              className="px-3 py-1.5 bg-[#242F49] border border-[#384358] hover:border-[#FFA586] text-xs font-mono text-[#FFF1EB] transition-all flex items-center gap-1.5"
             >
-              <Play className="w-3 h-3 text-[#F6DBC0]" />
+              <Play className="w-3 h-3 text-[#FFA586]" />
               {p.title}
             </button>
           ))}
@@ -162,11 +162,11 @@ export default function DemoScannerPage() {
       {/* Input Box */}
       <div className="hud-card p-6 space-y-4">
         <div className="flex items-center gap-4">
-          <label className="text-xs font-mono text-[#C4B0C7]">APP PLATFORM:</label>
+          <label className="text-xs font-mono text-[#A2B0C7]">APP PLATFORM:</label>
           <select
             value={appSource}
             onChange={(e) => setAppSource(e.target.value)}
-            className="bg-[#1A0E23] border border-[#4A2A5E] text-xs font-mono text-[#F8F4E9] px-3 py-1.5 focus:border-[#F6DBC0] outline-none"
+            className="bg-[#161E2F] border border-[#384358] text-xs font-mono text-[#FFF1EB] px-3 py-1.5 focus:border-[#FFA586] outline-none"
           >
             <option value="Discord">Discord Direct Message</option>
             <option value="Roblox">Roblox In-Game Chat</option>
@@ -181,7 +181,7 @@ export default function DemoScannerPage() {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Type or paste suspicious text, URLs, or chat messages to test..."
-            className="w-full bg-[#1A0E23] border border-[#4A2A5E] p-4 text-xs font-mono text-[#F8F4E9] placeholder-[#C4B0C7]/40 focus:border-[#F6DBC0] outline-none"
+            className="w-full bg-[#161E2F] border border-[#384358] p-4 text-xs font-mono text-[#FFF1EB] placeholder-[#A2B0C7]/40 focus:border-[#FFA586] outline-none"
           />
         </div>
 
@@ -201,30 +201,30 @@ export default function DemoScannerPage() {
       {result && (
         <div
           className={`hud-card p-6 border-l-4 ${
-            result.status === 'BLOCKED' ? 'border-l-[#935073]' : 'border-l-[#F6DBC0]'
+            result.status === 'BLOCKED' ? 'border-l-[#B51A2B]' : 'border-l-[#FFA586]'
           }`}
         >
           <div className="flex items-center gap-2 mb-3">
             {result.status === 'BLOCKED' ? (
-              <ShieldAlert className="w-5 h-5 text-[#F6DBC0]" />
+              <ShieldAlert className="w-5 h-5 text-[#FFA586]" />
             ) : (
-              <ShieldCheck className="w-5 h-5 text-[#F8F4E9]" />
+              <ShieldCheck className="w-5 h-5 text-[#FFF1EB]" />
             )}
             <span
               className={`font-mono text-sm font-bold uppercase ${
-                result.status === 'BLOCKED' ? 'text-[#F6DBC0]' : 'text-[#F8F4E9]'
+                result.status === 'BLOCKED' ? 'text-[#FFA586]' : 'text-[#FFF1EB]'
               }`}
             >
               ACTION: {result.status}
             </span>
-            <span className="text-xs font-mono text-[#C4B0C7] ml-auto">
+            <span className="text-xs font-mono text-[#A2B0C7] ml-auto">
               Category: {result.threatCategory || result.threatType || 'N/A'}
             </span>
           </div>
 
           {result.childFriendlyExplanation && (
-            <div className="p-4 bg-[#1A0E23] border border-[#4A2A5E] text-xs text-[#F8F4E9]">
-              <div className="font-mono text-[10px] text-[#F6DBC0] font-bold uppercase mb-1">
+            <div className="p-4 bg-[#161E2F] border border-[#384358] text-xs text-[#FFF1EB]">
+              <div className="font-mono text-[10px] text-[#FFA586] font-bold uppercase mb-1">
                 Empathy AI Coach Explanation:
               </div>
               {result.childFriendlyExplanation}
