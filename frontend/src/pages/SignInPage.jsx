@@ -135,16 +135,16 @@ export default function SignInPage() {
     return (
       <div className="max-w-md mx-auto py-12">
         <div className="hud-card p-8 text-center space-y-6">
-          <div className="w-16 h-16 bg-[#1A0E23] border border-[#F6DBC0] mx-auto flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-[#F6DBC0]" />
+          <div className="w-16 h-16 bg-[#161E2F] border border-[#FFA586] mx-auto flex items-center justify-center">
+            <CheckCircle className="w-8 h-8 text-[#FFA586]" />
           </div>
 
           <div>
-            <h2 className="text-xl font-black tracking-wider text-[#F8F4E9]">GOOGLE SESSION ACTIVE</h2>
-            <p className="text-xs font-mono text-[#C4B0C7] mt-1">
-              Signed in via Google as <strong className="text-[#F6DBC0]">{user.name}</strong> ({user.email})
+            <h2 className="text-xl font-black tracking-wider text-[#FFF1EB]">GOOGLE SESSION ACTIVE</h2>
+            <p className="text-xs font-mono text-[#A2B0C7] mt-1">
+              Signed in via Google as <strong className="text-[#FFA586]">{user.name}</strong> ({user.email})
             </p>
-            <span className="inline-block mt-2 px-2.5 py-0.5 bg-[#502D55] text-[#F6DBC0] border border-[#935073] text-[10px] font-mono font-bold uppercase">
+            <span className="inline-block mt-2 px-2.5 py-0.5 bg-[#541A2E] text-[#FFA586] border border-[#B51A2B] text-[10px] font-mono font-bold uppercase">
               Authenticated Role: {user.role}
             </span>
           </div>
@@ -172,13 +172,13 @@ export default function SignInPage() {
     <div className="max-w-xl mx-auto py-8 space-y-6">
       {/* Security Gatekeeper Header */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#2A1638] border border-[#935073] text-[#F6DBC0] text-xs font-mono font-bold tracking-widest uppercase">
-          <Lock className="w-3.5 h-3.5 text-[#F6DBC0]" /> Restricted Access • Google Login Required
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#242F49] border border-[#B51A2B] text-[#FFA586] text-xs font-mono font-bold tracking-widest uppercase">
+          <Lock className="w-3.5 h-3.5 text-[#FFA586]" /> Restricted Access • Google Login Required
         </div>
-        <h1 className="text-3xl font-black tracking-tight text-[#F8F4E9] uppercase">
+        <h1 className="text-3xl font-black tracking-tight text-[#FFF1EB] uppercase">
           SafeKids AI Access Portal
         </h1>
-        <p className="text-xs font-mono text-[#C4B0C7] max-w-md mx-auto leading-relaxed">
+        <p className="text-xs font-mono text-[#A2B0C7] max-w-md mx-auto leading-relaxed">
           To protect children and ensure COPPA compliance, all neural defenses and telemetry streams require an authenticated Google account.
         </p>
       </div>
@@ -187,15 +187,15 @@ export default function SignInPage() {
       <div className="hud-card p-8 space-y-6">
         {/* Alerts */}
         {errorMsg && (
-          <div className="p-3 bg-[#502D55]/50 border border-[#935073] text-[#F8F4E9] flex items-center gap-2 text-xs font-mono">
-            <AlertCircle className="w-4 h-4 text-[#F6DBC0] flex-shrink-0" />
+          <div className="p-3 bg-[#541A2E]/50 border border-[#B51A2B] text-[#FFF1EB] flex items-center gap-2 text-xs font-mono">
+            <AlertCircle className="w-4 h-4 text-[#FFA586] flex-shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="p-3 bg-[#2A1638] border border-[#F6DBC0] text-[#F8F4E9] flex items-center gap-2 text-xs font-mono">
-            <CheckCircle className="w-4 h-4 text-[#F6DBC0] flex-shrink-0" />
+          <div className="p-3 bg-[#242F49] border border-[#FFA586] text-[#FFF1EB] flex items-center gap-2 text-xs font-mono">
+            <CheckCircle className="w-4 h-4 text-[#FFA586] flex-shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
@@ -208,7 +208,7 @@ export default function SignInPage() {
             type="button"
             onClick={() => handleGoogleSignIn()}
             disabled={loading}
-            className="w-full py-3.5 bg-[#1A0E23] border border-[#F6DBC0] hover:bg-[#381E48] text-[#F8F4E9] hover:text-[#F6DBC0] text-xs font-mono font-bold tracking-wider flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm hover:border-[#F8F4E9]"
+            className="w-full py-3.5 bg-[#161E2F] border border-[#FFA586] hover:bg-[#2E3B5B] text-[#FFF1EB] hover:text-[#FFA586] text-xs font-mono font-bold tracking-wider flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm hover:border-[#FFF1EB]"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -233,41 +233,41 @@ export default function SignInPage() {
         </div>
 
         {/* Custom Google Account Input (Optional) */}
-        <div className="border border-[#4A2A5E] p-4 bg-[#1A0E23]/60 space-y-3">
-          <div className="text-[11px] font-mono font-bold text-[#F6DBC0] uppercase flex items-center gap-1.5">
+        <div className="border border-[#384358] p-4 bg-[#161E2F]/60 space-y-3">
+          <div className="text-[11px] font-mono font-bold text-[#FFA586] uppercase flex items-center gap-1.5">
             <UserCheck className="w-3.5 h-3.5" /> Or Enter Specific Google Account:
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-mono text-[#C4B0C7] mb-1">GOOGLE NAME</label>
+              <label className="block text-[10px] font-mono text-[#A2B0C7] mb-1">GOOGLE NAME</label>
               <input
                 type="text"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder="e.g. John Doe"
-                className="w-full bg-[#1A0E23] border border-[#4A2A5E] px-3 py-2 text-xs font-mono text-[#F8F4E9] placeholder-[#C4B0C7]/40 focus:border-[#F6DBC0] outline-none"
+                className="w-full bg-[#161E2F] border border-[#384358] px-3 py-2 text-xs font-mono text-[#FFF1EB] placeholder-[#A2B0C7]/40 focus:border-[#FFA586] outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono text-[#C4B0C7] mb-1">GMAIL / GOOGLE EMAIL</label>
+              <label className="block text-[10px] font-mono text-[#A2B0C7] mb-1">GMAIL / GOOGLE EMAIL</label>
               <input
                 type="email"
                 value={customEmail}
                 onChange={(e) => setCustomEmail(e.target.value)}
                 placeholder="your.email@gmail.com"
-                className="w-full bg-[#1A0E23] border border-[#4A2A5E] px-3 py-2 text-xs font-mono text-[#F8F4E9] placeholder-[#C4B0C7]/40 focus:border-[#F6DBC0] outline-none"
+                className="w-full bg-[#161E2F] border border-[#384358] px-3 py-2 text-xs font-mono text-[#FFF1EB] placeholder-[#A2B0C7]/40 focus:border-[#FFA586] outline-none"
               />
             </div>
           </div>
 
           <div className="flex items-center justify-between gap-4 pt-1">
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-mono text-[#C4B0C7]">ROLE:</label>
+              <label className="text-[10px] font-mono text-[#A2B0C7]">ROLE:</label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="bg-[#1A0E23] border border-[#4A2A5E] px-2 py-1 text-[11px] font-mono text-[#F8F4E9] outline-none"
+                className="bg-[#161E2F] border border-[#384358] px-2 py-1 text-[11px] font-mono text-[#FFF1EB] outline-none"
               >
                 <option value="PARENT">Parent / Legal Guardian</option>
                 <option value="CHILD">Youth Learner (Child)</option>
@@ -286,8 +286,8 @@ export default function SignInPage() {
         </div>
 
         {/* 1-Click Verified Google Profiles */}
-        <div className="border-t border-[#4A2A5E] pt-5 space-y-3">
-          <span className="text-[11px] font-mono text-[#C4B0C7] uppercase block font-bold">
+        <div className="border-t border-[#384358] pt-5 space-y-3">
+          <span className="text-[11px] font-mono text-[#A2B0C7] uppercase block font-bold">
             ⚡ Quick 1-Click Verified Google Accounts:
           </span>
           <div className="space-y-2">
@@ -297,22 +297,22 @@ export default function SignInPage() {
                 type="button"
                 onClick={() => handleGoogleSignIn(p)}
                 disabled={loading}
-                className="w-full p-3 bg-[#1A0E23] border border-[#4A2A5E] hover:border-[#F6DBC0] text-left transition-all flex items-center justify-between group cursor-pointer"
+                className="w-full p-3 bg-[#161E2F] border border-[#384358] hover:border-[#FFA586] text-left transition-all flex items-center justify-between group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <img
                     src={p.avatarUrl}
                     alt={p.name}
-                    className="w-8 h-8 bg-[#2A1638] border border-[#935073] flex-shrink-0"
+                    className="w-8 h-8 bg-[#242F49] border border-[#B51A2B] flex-shrink-0"
                   />
                   <div>
-                    <div className="text-xs font-mono font-bold text-[#F8F4E9] group-hover:text-[#F6DBC0]">
+                    <div className="text-xs font-mono font-bold text-[#FFF1EB] group-hover:text-[#FFA586]">
                       {p.title}
                     </div>
-                    <div className="text-[10px] font-mono text-[#C4B0C7]">{p.email}</div>
+                    <div className="text-[10px] font-mono text-[#A2B0C7]">{p.email}</div>
                   </div>
                 </div>
-                <span className="text-[9px] font-mono uppercase px-2 py-0.5 bg-[#381E48] text-[#F6DBC0] border border-[#4A2A5E]">
+                <span className="text-[9px] font-mono uppercase px-2 py-0.5 bg-[#2E3B5B] text-[#FFA586] border border-[#384358]">
                   {p.badge}
                 </span>
               </button>
