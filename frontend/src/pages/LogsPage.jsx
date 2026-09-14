@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, RefreshCw } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function LogsPage() {
   const [logs, setLogs] = useState([]);
   const [filterStatus, setFilterStatus] = useState('ALL');
@@ -9,7 +11,7 @@ export default function LogsPage() {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:5000/api/dashboard/logs?userId=user_child_01&status=${filterStatus}`);
+      const res = await fetch(`${API_BASE_URL}/api/dashboard/logs?userId=user_child_01&status=${filterStatus}`);
       if (res.ok) {
         const data = await res.json();
         setLogs(data.logs || []);
