@@ -24,7 +24,6 @@ export async function checkOpenAiModeration(text) {
 
     const isAdult =
       lower.includes('porn') ||
-      lower.includes('pornhub') ||
       lower.includes('xxx') ||
       lower.includes('xvideos') ||
       lower.includes('onlyfans') ||

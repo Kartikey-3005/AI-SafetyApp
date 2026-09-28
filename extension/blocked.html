@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeKids AI - Page Blocked for Safety</title>
+  <link rel="stylesheet" href="blocked.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="mesh-glow"></div>
+
+  <main class="blocked-container">
+    <div class="shield-badge">
+      <div class="shield-icon-wrapper">
+        <svg class="shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <span class="shield-tag">SAFEKIDS AI GUARDIAN</span>
+    </div>
+
+    <div class="threat-alert">
+      <div class="pulse-dot"></div>
+      <span id="threatCategory">POTENTIAL THREAT INTERCEPTED</span>
+    </div>
+
+    <h1 class="headline">Whoa there! We paused this page to keep you safe.</h1>
+
+    <div class="explanation-card">
+      <div class="ai-agent-header">
+        <span class="ai-avatar">🤖</span>
+        <span class="ai-name">SafeKids AI Explanation</span>
+      </div>
+      <p id="childExplanation" class="explanation-text">
+        Loading safety details...
+      </p>
+    </div>
+
+    <div class="url-strip">
+      <span class="url-label">Target Destination:</span>
+      <span id="originalUrl" class="url-value">Unknown</span>
+    </div>
+
+    <div class="action-row">
+      <button id="goBackBtn" class="btn btn-primary" id="btn-go-back">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Return to Safety
+      </button>
+      <button id="closeTabBtn" class="btn btn-secondary" id="btn-close-tab">
+        Close This Tab
+      </button>
+    </div>
+
+    <footer class="footer-meta">
+      Protected by SafeKids AI Neural Sentinel &bull; Incident logged to Parent Dashboard
+    </footer>
+  </main>
+
+  <script src="blocked.js"></script>
+</body>
+</html>

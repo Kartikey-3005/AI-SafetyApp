@@ -12,7 +12,6 @@ export const adultKeywords = [
   'porn',
   'xxx',
   'xvideos',
-  'pornhub',
   'sex',
   'onlyfans',
   'chaturbate',
@@ -22,8 +21,9 @@ export const adultKeywords = [
   'adult'
 ];
 
-// 2. Regionally Banned Domains (e.g. Indian DoT Orders, illegal betting, predatory streams)
+// 2. Regionally Banned / Restricted Streaming & Entertainment Domains
 export const indiaBannedDomains = [
+  'netflix.com',
   'desiflix.com',
   'neonxvip.com',
   'ullu.app',
@@ -106,8 +106,19 @@ export async function evaluateTier1Heuristics({ hostname, protocol, rawUrl }) {
     };
   }
 
-  // B. Regional Compliance / India DoT Blocklist Check
-  // Check Redis cache for regional lookup
+  // B. Regional Compliance / India DoT Blocklist & Restricted Streaming Check
+  // Check direct restricted streaming first
+  if (normalizedHost.includes('netflix.com')) {
+    return {
+      isThreat: true,
+      category: 'Restricted Streaming Service',
+      threatType: 'UNVERIFIED_ADULT',
+      reason: 'Restricted Streaming Platform (netflix.com blocked by parental control policy)',
+      childFriendlyExplanation: '🛡️ "Access to Netflix is blocked during study hours by your parental control rules."',
+      layer: 'TIER_1_RESTRICTED_STREAMING',
+    };
+  }
+
   const regCacheKey = `blocklist:india:${normalizedHost}`;
   try {
     const cachedReg = await redisClient.get(regCacheKey);
@@ -149,13 +160,18 @@ export async function evaluateTier1Heuristics({ hostname, protocol, rawUrl }) {
   }
 
   if (isRegionallyBanned) {
+    const isNetflix = normalizedHost.includes('netflix.com');
     return {
       isThreat: true,
-      category: 'Regionally Banned Content',
-      threatType: 'GOVERNMENT_DIRECTIVE',
-      reason: 'Regionally Banned Content (India DoT / MeitY Directive)',
-      childFriendlyExplanation: '🛡️ "This website has been restricted by national cyber directives to protect users from illegal gambling, betting, or unrated content."',
-      layer: 'TIER_1_REGIONAL_BANNED',
+      category: isNetflix ? 'Restricted Streaming Service' : 'Regionally Banned Content',
+      threatType: isNetflix ? 'UNVERIFIED_ADULT' : 'GOVERNMENT_DIRECTIVE',
+      reason: isNetflix 
+        ? 'Restricted Streaming Platform (netflix.com blocked by parental control policy)' 
+        : 'Regionally Banned Content (India DoT / MeitY Directive)',
+      childFriendlyExplanation: isNetflix
+        ? '🛡️ "Access to Netflix is blocked during study hours by your parental control rules."'
+        : '🛡️ "This website has been restricted by national cyber directives to protect users from illegal gambling, betting, or unrated content."',
+      layer: isNetflix ? 'TIER_1_RESTRICTED_STREAMING' : 'TIER_1_REGIONAL_BANNED',
     };
   }
 

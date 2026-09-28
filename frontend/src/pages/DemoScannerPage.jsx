@@ -13,9 +13,9 @@ export default function DemoScannerPage() {
 
   const presets = [
     {
-      title: 'Adult Website (Pornhub)',
+      title: 'Restricted Streaming (Netflix)',
       app: 'Browser',
-      text: 'https://www.pornhub.com',
+      text: 'https://www.netflix.com',
     },
     {
       title: 'Direct IP Access (192.168.1.1)',
@@ -189,7 +189,7 @@ export default function DemoScannerPage() {
             rows={3}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Enter destination URL or domain (e.g. [https://www.pornhub.com], http://192.168.1.1, https://desiflix.com)..."
+            placeholder="Enter destination URL or domain (e.g. [https://www.netflix.com], http://192.168.1.1, https://desiflix.com)..."
             className="w-full bg-[#161E2F] border border-[#384358] p-4 text-xs font-mono text-[#FFF1EB] placeholder-[#A2B0C7]/40 focus:border-[#FFA586] outline-none"
           />
           <div className="text-[10px] font-mono text-[#A2B0C7] mt-1">
